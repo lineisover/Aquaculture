@@ -13,6 +13,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -32,7 +33,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.PlayMessages;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.Validate;
@@ -90,11 +90,11 @@ public class FishMountEntity extends HangingEntity implements IEntityAdditionalS
 
     @Override
     public boolean survives() {
-        if (!this.level.noCollision(this)) {
+        if (!this.level().noCollision(this)) {
             return false;
         } else {
-            BlockState state = this.level.getBlockState(this.pos.relative(this.direction.getOpposite()));
-            return (state.getMaterial().isSolid() || this.direction.getAxis().isHorizontal() && DiodeBlock.isDiode(state)) && this.level.getEntities(this, this.getBoundingBox(), HANGING_ENTITY).isEmpty();
+            BlockState state = this.level().getBlockState(this.pos.relative(this.direction.getOpposite()));
+            return (state.isSolid() || this.direction.getAxis().isHorizontal() && DiodeBlock.isDiode(state)) && this.level().getEntities(this, this.getBoundingBox(), HANGING_ENTITY).isEmpty();
         }
     }
 
@@ -142,8 +142,8 @@ public class FishMountEntity extends HangingEntity implements IEntityAdditionalS
     public boolean hurt(@Nonnull DamageSource source, float amount) {
         if (this.isInvulnerableTo(source)) {
             return false;
-        } else if (!source.isExplosion() && !this.getDisplayedItem().isEmpty()) {
-            if (!this.level.isClientSide) {
+        } else if (!source.is(DamageTypeTags.IS_EXPLOSION) && !this.getDisplayedItem().isEmpty()) {
+            if (!this.level().isClientSide) {
                 this.dropItemOrSelf(source.getEntity(), false);
                 this.playSound(AquaSounds.FISH_MOUNT_REMOVED.get(), 1.0F, 1.0F);
             }
@@ -183,7 +183,7 @@ public class FishMountEntity extends HangingEntity implements IEntityAdditionalS
     }
 
     private void dropItemOrSelf(@Nullable Entity entity, boolean shouldDropSelf) {
-        if (!this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+        if (!this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             if (entity == null) {
                 this.setDisplayedItem(ItemStack.EMPTY);
             }
@@ -240,7 +240,7 @@ public class FishMountEntity extends HangingEntity implements IEntityAdditionalS
         }
 
         if (shouldUpdate && this.pos != null) {
-            this.level.updateNeighbourForOutputSignal(this.pos, Blocks.AIR);
+            this.level().updateNeighbourForOutputSignal(this.pos, Blocks.AIR);
         }
     }
 
@@ -258,7 +258,7 @@ public class FishMountEntity extends HangingEntity implements IEntityAdditionalS
             if (displayStack != null && !displayStack.isEmpty()) {
                 EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(ForgeRegistries.ITEMS.getKey(displayStack.getItem()));
                 if (entityType != null && entityType != EntityType.PIG) {
-                    this.entity = entityType.create(this.level);
+                    this.entity = entityType.create(this.level());
                 }
             } else {
                 this.entity = null;
@@ -303,7 +303,7 @@ public class FishMountEntity extends HangingEntity implements IEntityAdditionalS
     @Nonnull
     public InteractionResult interact(Player player, @Nonnull InteractionHand hand) {
         ItemStack heldStack = player.getItemInHand(hand);
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             if (this.getDisplayedItem().isEmpty()) {
                 Item heldItem = heldStack.getItem();
                 EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(ForgeRegistries.ITEMS.getKey(heldItem));

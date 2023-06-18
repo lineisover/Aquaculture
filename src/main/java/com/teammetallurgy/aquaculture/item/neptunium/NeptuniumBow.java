@@ -1,16 +1,13 @@
 package com.teammetallurgy.aquaculture.item.neptunium;
 
-import com.teammetallurgy.aquaculture.Aquaculture;
 import com.teammetallurgy.aquaculture.entity.SpectralWaterArrowEntity;
 import com.teammetallurgy.aquaculture.entity.WaterArrowEntity;
-import com.teammetallurgy.aquaculture.init.AquaItems;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 
@@ -26,13 +23,13 @@ public class NeptuniumBow extends BowItem {
         if (arrowEntity.getType() == EntityType.ARROW) {
             Entity shooter = arrowEntity.getOwner();
             if (shooter instanceof LivingEntity) {
-                return new WaterArrowEntity(arrowEntity.level, (LivingEntity) shooter);
+                return new WaterArrowEntity(arrowEntity.level(), (LivingEntity) shooter);
             }
         }
         if (arrowEntity.getType() == EntityType.SPECTRAL_ARROW) {
             Entity shooter = arrowEntity.getOwner();
             if (shooter instanceof LivingEntity) {
-                return new SpectralWaterArrowEntity(arrowEntity.level, (LivingEntity) shooter);
+                return new SpectralWaterArrowEntity(arrowEntity.level(), (LivingEntity) shooter);
             }
         }
         return super.customArrow(arrowEntity);
